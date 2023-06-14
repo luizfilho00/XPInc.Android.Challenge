@@ -1,7 +1,6 @@
-package br.com.xpinc.mobile.contacts.repository
+package br.com.xpinc.mobile.contacts
 
 import android.content.res.Resources
-import br.com.xpinc.mobile.contacts.R
 import br.com.xpinc.mobile.contacts.model.Contact
 import kotlin.random.Random
 import org.json.JSONArray

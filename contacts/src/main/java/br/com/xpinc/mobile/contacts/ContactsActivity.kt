@@ -20,7 +20,8 @@ import br.com.xpinc.mobile.contacts.repository.ContactsRepository
  */
 class ContactsActivity : AppCompatActivity() {
 
-    private val repository by lazy { ContactsRepository(resources) }
+    private val service by lazy { ContactsApiService(resources) }
+    private val repository by lazy { ContactsRepository(service) }
     private val viewModel by viewModels<ContactsViewModel> { ContactsViewModelFactory(repository) }
     private val recyclerView by lazy { findViewById<RecyclerView>(R.id.recyclerView) }
     private val searchView by lazy { findViewById<SearchView>(R.id.searchView) }
