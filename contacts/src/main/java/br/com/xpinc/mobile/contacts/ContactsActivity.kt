@@ -13,7 +13,7 @@ import br.com.xpinc.mobile.contacts.repository.ContactsRepository
  * 1 - Exibir a lista de contatos retornada pelo repository
  * 2 - Usar uma arquitetura para a view: MVVM / MVI / MVP
  * 3 - Implementar busca de contatos durante a digitação do texto
- * 4 - Melhorias na arquitetura da feature de contatos
+ * 4 - Melhorias de código (arquitetura, performance, views, etc)
  * 5 - Testes
  * 6 - Usar dagger para prover as dependências
  * 7 - Paginação da lista de contatos (bônus)
