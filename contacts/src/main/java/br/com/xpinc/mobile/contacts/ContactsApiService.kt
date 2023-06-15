@@ -29,17 +29,17 @@ interface ContactsApiService {
     suspend fun getContactsByPage(page: Int): List<Contact>
 
     /**
-     * Retrieves all contacts as a single.
+     * Retrieves all contacts as a [Single].
      *
-     * @return The single containing the list of contacts.
+     * @return The [Single] containing the list of contacts.
      */
     fun getSingleContacts(): Single<List<Contact>>
 
     /**
-     * Retrieves contacts for a specific page as a single.
+     * Retrieves contacts for a specific page as a [Single].
      *
      * @param page The page number.
-     * @return The single containing the list of contacts for the specified page.
+     * @return The [Single] containing the list of contacts for the specified page.
      */
     fun getSingleContactsByPage(page: Int): Single<List<Contact>>
 }
@@ -83,9 +83,9 @@ class ContactsApiServiceImpl(
     }
 
     /**
-     * Retrieves all contacts as a single.
+     * Retrieves all contacts as a [Single].
      *
-     * @return The single containing the list of contacts.
+     * @return The [Single] containing the list of contacts.
      */
     override fun getSingleContacts(): Single<List<Contact>> =
         Single.fromCallable {
@@ -94,10 +94,10 @@ class ContactsApiServiceImpl(
         }.delay(sleepTime, TimeUnit.MILLISECONDS)
 
     /**
-     * Retrieves contacts for a specific page as a single.
+     * Retrieves contacts for a specific page as a [Single].
      *
      * @param page The page number.
-     * @return The single containing the list of contacts for the specified page.
+     * @return The [Single] containing the list of contacts for the specified page.
      */
     override fun getSingleContactsByPage(page: Int): Single<List<Contact>> =
         Single.fromCallable {
