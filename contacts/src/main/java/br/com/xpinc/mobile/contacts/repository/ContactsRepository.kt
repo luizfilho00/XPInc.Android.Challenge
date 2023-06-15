@@ -3,25 +3,20 @@ package br.com.xpinc.mobile.contacts.repository
 import br.com.xpinc.mobile.contacts.ContactsApiService
 import br.com.xpinc.mobile.contacts.model.Contact
 import io.reactivex.Single
-import kotlinx.coroutines.coroutineScope
 
 class ContactsRepository(
     private val service: ContactsApiService,
 ) {
 
-    suspend fun getContacts(): List<Contact> {
-        return try {
-            coroutineScope {
-                service.getContactsFromResource()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            emptyList()
-        }
-    }
+    suspend fun getContacts(): List<Contact> =
+        service.getContacts()
+
+    suspend fun getContactsByPage(page: Int): List<Contact> =
+        service.getContactsByPage(page)
 
     fun getSingleContacts(): Single<List<Contact>> =
-        Single.fromCallable {
-            service.getContactsFromResource()
-        }
+        service.getSingleContacts()
+
+    fun getSingleContactsByPage(page: Int): Single<List<Contact>> =
+        service.getSingleContactsByPage(page)
 }
