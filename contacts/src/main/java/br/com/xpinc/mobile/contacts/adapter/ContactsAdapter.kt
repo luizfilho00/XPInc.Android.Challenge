@@ -8,6 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import br.com.xpinc.mobile.contacts.R
 import br.com.xpinc.mobile.contacts.model.Contact
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 
 class ContactsAdapter : RecyclerView.Adapter<ContactsViewHolder>() {
     private val items = mutableListOf<Contact>()
@@ -29,7 +32,18 @@ class ContactsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
 
     @SuppressLint("SetTextI18n")
     fun bind(contact: Contact) {
+        loadAvatar(contact.email)
         view.findViewById<TextView>(R.id.textViewName).text = "Nome: ${contact.name}"
         view.findViewById<TextView>(R.id.textViewEmail).text = "Email: ${contact.email}"
+    }
+
+    private fun loadAvatar(email: String) {
+        Glide.with(view)
+            .load("https://api.multiavatar.com/$email.png?apikey=YUWQMZ3LuEqFX5")
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .placeholder(R.drawable.avatar_placeholder)
+            .circleCrop()
+            .into(view.findViewById(R.id.imageViewAvatar))
     }
 }

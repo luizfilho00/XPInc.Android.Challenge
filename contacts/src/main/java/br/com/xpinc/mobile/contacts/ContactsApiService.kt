@@ -3,10 +3,10 @@ package br.com.xpinc.mobile.contacts
 import android.content.res.Resources
 import br.com.xpinc.mobile.contacts.model.Contact
 import io.reactivex.Single
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 import kotlinx.coroutines.delay
 import org.json.JSONArray
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 /**
  * Interface that defines the methods to retrieve contacts from the API service.
@@ -88,10 +88,15 @@ class ContactsApiServiceImpl(
      * @return The [Single] containing the list of contacts.
      */
     override fun getSingleContacts(): Single<List<Contact>> =
-        Single.fromCallable {
-            simulateError()
-            loadFromFile(paging = false)
-        }.delay(sleepTime, TimeUnit.MILLISECONDS)
+        Single
+            .fromCallable {
+                loadFromFile(paging = false)
+            }
+            .delay(sleepTime, TimeUnit.MILLISECONDS)
+            .map {
+                simulateError()
+                it
+            }
 
     /**
      * Retrieves contacts for a specific page as a [Single].
@@ -100,13 +105,18 @@ class ContactsApiServiceImpl(
      * @return The [Single] containing the list of contacts for the specified page.
      */
     override fun getSingleContactsByPage(page: Int): Single<List<Contact>> =
-        Single.fromCallable {
-            if (page == 1 || mapPaging.isEmpty()) {
-                loadFromFile(paging = true)
+        Single
+            .fromCallable {
+                if (page == 1 || mapPaging.isEmpty()) {
+                    loadFromFile(paging = true)
+                }
+                mapPaging[page].orEmpty()
             }
-            simulateError()
-            mapPaging[page].orEmpty()
-        }.delay(sleepTime, TimeUnit.MILLISECONDS)
+            .delay(sleepTime, TimeUnit.MILLISECONDS)
+            .map {
+                simulateError()
+                it
+            }
 
     private fun loadFromFile(paging: Boolean = false): List<Contact> =
         resources.openRawResource(R.raw.contacts).bufferedReader().use { reader ->
