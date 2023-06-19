@@ -54,8 +54,10 @@ class ContactsApiServiceImpl(
     private val errorLimit: Int = 100,
     private val contactLimitSize: Int = 100,
 ) : ContactsApiService {
-    private var lastPageIndex = 0
-    private var previousPageIndex = 0
+    companion object {
+        private const val PAGE_SIZE = 100
+    }
+
     private val memoryCache = mutableListOf<Contact>()
 
     override suspend fun getContacts(query: String): List<Contact> {
@@ -70,7 +72,7 @@ class ContactsApiServiceImpl(
         }
         delay(sleepTime)
         simulateError()
-        return getPaginated(page, query)
+        return getPage(page, query)
     }
 
     override fun getSingleContacts(query: String): Single<List<Contact>> =
@@ -89,7 +91,7 @@ class ContactsApiServiceImpl(
             if (page == 1 || memoryCache.isEmpty()) {
                 loadFromFile(paging = true)
             }
-            getPaginated(page, query)
+            getPage(page, query)
         }
             .delay(sleepTime, TimeUnit.MILLISECONDS)
             .map {
@@ -100,8 +102,6 @@ class ContactsApiServiceImpl(
     private fun loadFromFile(paging: Boolean = false): List<Contact> =
         resources.openRawResource(R.raw.contacts).bufferedReader().use { reader ->
             val json = JSONArray(reader.readText())
-            lastPageIndex = 0
-            previousPageIndex = 0
             memoryCache.clear()
             for (i in 1..if (paging) json.length() else contactLimitSize) {
                 val jsonObject = json.getJSONObject(i - 1)
@@ -116,20 +116,26 @@ class ContactsApiServiceImpl(
             memoryCache
         }
 
-    private fun getPaginated(page: Int, query: String = ""): List<Contact> {
-        val listFiltered = memoryCache.filterByQuery(query).toList()
-        val pageCutIndex = page * 100
-        previousPageIndex = if (page == 1) 0 else lastPageIndex
-        lastPageIndex =
-            if (listFiltered.size > pageCutIndex) pageCutIndex + 1 else listFiltered.size
-        return listFiltered.subList(previousPageIndex, lastPageIndex)
-    }
-
     private fun List<Contact>.filterByQuery(query: String) =
-        filter {
-            it.name.contains(query, true) ||
-                it.email.contains(query, true)
+        filter { contact ->
+            contact.name.contains(query, true) ||
+                contact.email.contains(query, true)
         }
+
+    private fun getPage(page: Int, query: String): List<Contact> {
+        val lastPageIndex = (page - 1) * PAGE_SIZE
+        val nextPageIndex = page * PAGE_SIZE
+        return try {
+            val filtered = memoryCache
+                .filterByQuery(query)
+            filtered.subList(
+                lastPageIndex,
+                if (filtered.size > PAGE_SIZE) nextPageIndex else filtered.size
+            )
+        } catch (ex: Exception) {
+            emptyList()
+        }
+    }
 
     private fun simulateError() {
         val count = Random(System.currentTimeMillis()).nextInt(errorLimit)
