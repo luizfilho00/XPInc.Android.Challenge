@@ -8,15 +8,15 @@ class ContactsRepository(
     private val service: ContactsApiService,
 ) {
 
-    suspend fun getContacts(): List<Contact> =
-        service.getContacts()
+    suspend fun getContacts(query: String = ""): List<Contact> =
+        service.getContacts(query = query)
 
-    suspend fun getContactsByPage(page: Int): List<Contact> =
-        service.getContactsByPage(page)
+    suspend fun getContactsByPage(page: Int, query: String = ""): List<Contact> =
+        service.getContactsByPage(page = page, query = query)
 
-    fun getSingleContacts(): Single<List<Contact>> =
-        service.getSingleContacts()
+    fun getSingleContacts(query: String = ""): Single<List<Contact>> =
+        service.getSingleContacts(query = query)
 
-    fun getSingleContactsByPage(page: Int): Single<List<Contact>> =
-        service.getSingleContactsByPage(page)
+    fun getSingleContactsByPage(page: Int, query: String = ""): Single<List<Contact>> =
+        service.getSingleContactsByPage(page = page, query = query)
 }

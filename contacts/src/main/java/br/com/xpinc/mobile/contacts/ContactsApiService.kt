@@ -14,83 +14,69 @@ import kotlin.random.Random
 interface ContactsApiService {
 
     /**
-     * Retrieves all contacts.
+     * Retrieves contacts based on a query.
      *
-     * @return The list of contacts.
+     * @param query The search query.
+     * @return The list of contact responses.
      */
-    suspend fun getContacts(): List<Contact>
+    suspend fun getContacts(query: String): List<Contact>
 
     /**
-     * Retrieves contacts for a specific page.
+     * Retrieves contacts for a specific page based on a query.
      *
      * @param page The page number.
-     * @return The list of contacts for the specified page.
+     * @param query The search query.
+     * @return The list of contact responses for the specified page.
      */
-    suspend fun getContactsByPage(page: Int): List<Contact>
+    suspend fun getContactsByPage(page: Int, query: String): List<Contact>
 
     /**
-     * Retrieves all contacts as a [Single].
+     * Retrieves contacts as a single based on a query.
      *
-     * @return The [Single] containing the list of contacts.
+     * @param query The search query.
+     * @return The single containing the list of contact responses.
      */
-    fun getSingleContacts(): Single<List<Contact>>
+    fun getSingleContacts(query: String): Single<List<Contact>>
 
     /**
-     * Retrieves contacts for a specific page as a [Single].
+     * Retrieves contacts for a specific page as a single based on a query.
      *
      * @param page The page number.
-     * @return The [Single] containing the list of contacts for the specified page.
+     * @param query The search query.
+     * @return The single containing the list of contact responses for the specified page.
      */
-    fun getSingleContactsByPage(page: Int): Single<List<Contact>>
+    fun getSingleContactsByPage(page: Int, query: String): Single<List<Contact>>
 }
 
-/**
- * Implementation of the ContactsApiService interface.
- */
 class ContactsApiServiceImpl(
     private val resources: Resources,
     private val sleepTime: Long = 800,
     private val errorLimit: Int = 100,
     private val contactLimitSize: Int = 100,
 ) : ContactsApiService {
+    private var lastPageIndex = 0
+    private var previousPageIndex = 0
+    private val memoryCache = mutableListOf<Contact>()
 
-    private val mapPaging: MutableMap<Int, List<Contact>> = hashMapOf()
-
-    /**
-     * Retrieves all contacts.
-     *
-     * @return The list of contacts.
-     */
-    override suspend fun getContacts(): List<Contact> {
+    override suspend fun getContacts(query: String): List<Contact> {
         delay(sleepTime)
         simulateError()
-        return loadFromFile(paging = false)
+        return loadFromFile(paging = false).filterByQuery(query)
     }
 
-    /**
-     * Retrieves contacts for a specific page.
-     *
-     * @param page The page number.
-     * @return The list of contacts for the specified page.
-     */
-    override suspend fun getContactsByPage(page: Int): List<Contact> {
-        if (page == 1 || mapPaging.isEmpty()) {
+    override suspend fun getContactsByPage(page: Int, query: String): List<Contact> {
+        if (page == 1 || memoryCache.isEmpty()) {
             loadFromFile(paging = true)
         }
         delay(sleepTime)
         simulateError()
-        return mapPaging[page].orEmpty()
+        return getPaginated(page, query)
     }
 
-    /**
-     * Retrieves all contacts as a [Single].
-     *
-     * @return The [Single] containing the list of contacts.
-     */
-    override fun getSingleContacts(): Single<List<Contact>> =
+    override fun getSingleContacts(query: String): Single<List<Contact>> =
         Single
             .fromCallable {
-                loadFromFile(paging = false)
+                loadFromFile(paging = false).filterByQuery(query)
             }
             .delay(sleepTime, TimeUnit.MILLISECONDS)
             .map {
@@ -98,20 +84,13 @@ class ContactsApiServiceImpl(
                 it
             }
 
-    /**
-     * Retrieves contacts for a specific page as a [Single].
-     *
-     * @param page The page number.
-     * @return The [Single] containing the list of contacts for the specified page.
-     */
-    override fun getSingleContactsByPage(page: Int): Single<List<Contact>> =
-        Single
-            .fromCallable {
-                if (page == 1 || mapPaging.isEmpty()) {
-                    loadFromFile(paging = true)
-                }
-                mapPaging[page].orEmpty()
+    override fun getSingleContactsByPage(page: Int, query: String): Single<List<Contact>> =
+        Single.fromCallable {
+            if (page == 1 || memoryCache.isEmpty()) {
+                loadFromFile(paging = true)
             }
+            getPaginated(page, query)
+        }
             .delay(sleepTime, TimeUnit.MILLISECONDS)
             .map {
                 simulateError()
@@ -121,25 +100,35 @@ class ContactsApiServiceImpl(
     private fun loadFromFile(paging: Boolean = false): List<Contact> =
         resources.openRawResource(R.raw.contacts).bufferedReader().use { reader ->
             val json = JSONArray(reader.readText())
-            val list = mutableListOf<Contact>()
-            var page = 1
-            var lastIndex = 0
+            lastPageIndex = 0
+            previousPageIndex = 0
+            memoryCache.clear()
             for (i in 1..if (paging) json.length() else contactLimitSize) {
                 val jsonObject = json.getJSONObject(i - 1)
-                list.add(
+                memoryCache.add(
                     Contact(
                         id = jsonObject["id"] as String,
                         name = jsonObject["name"] as String,
                         email = jsonObject["email"] as String,
                     )
                 )
-                if (i % 100 == 0) {
-                    mapPaging[page] = list.toList().subList(lastIndex, i)
-                    page++
-                    lastIndex = i
-                }
             }
-            list
+            memoryCache
+        }
+
+    private fun getPaginated(page: Int, query: String = ""): List<Contact> {
+        val listFiltered = memoryCache.filterByQuery(query).toList()
+        val pageCutIndex = page * 100
+        previousPageIndex = if (page == 1) 0 else lastPageIndex
+        lastPageIndex =
+            if (listFiltered.size > pageCutIndex) pageCutIndex + 1 else listFiltered.size
+        return listFiltered.subList(previousPageIndex, lastPageIndex)
+    }
+
+    private fun List<Contact>.filterByQuery(query: String) =
+        filter {
+            it.name.contains(query, true) ||
+                it.email.contains(query, true)
         }
 
     private fun simulateError() {
