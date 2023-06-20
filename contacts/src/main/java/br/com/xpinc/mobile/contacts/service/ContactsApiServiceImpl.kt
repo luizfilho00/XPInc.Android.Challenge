@@ -1,52 +1,13 @@
-package br.com.xpinc.mobile.contacts
+package br.com.xpinc.mobile.contacts.service
 
 import android.content.res.Resources
+import br.com.xpinc.mobile.contacts.R
 import br.com.xpinc.mobile.contacts.model.Contact
 import io.reactivex.Single
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
-
-/**
- * Interface that defines the methods to retrieve contacts from the API service.
- */
-interface ContactsApiService {
-
-    /**
-     * Retrieves contacts based on a query.
-     *
-     * @param query The search query.
-     * @return The list of contact responses.
-     */
-    suspend fun getContacts(query: String): List<Contact>
-
-    /**
-     * Retrieves contacts for a specific page based on a query.
-     *
-     * @param page The page number.
-     * @param query The search query.
-     * @return The list of contact responses for the specified page.
-     */
-    suspend fun getContactsByPage(page: Int, query: String): List<Contact>
-
-    /**
-     * Retrieves contacts as a single based on a query.
-     *
-     * @param query The search query.
-     * @return The single containing the list of contact responses.
-     */
-    fun getSingleContacts(query: String): Single<List<Contact>>
-
-    /**
-     * Retrieves contacts for a specific page as a single based on a query.
-     *
-     * @param page The page number.
-     * @param query The search query.
-     * @return The single containing the list of contact responses for the specified page.
-     */
-    fun getSingleContactsByPage(page: Int, query: String): Single<List<Contact>>
-}
 
 class ContactsApiServiceImpl(
     private val resources: Resources,
@@ -76,10 +37,9 @@ class ContactsApiServiceImpl(
     }
 
     override fun getSingleContacts(query: String): Single<List<Contact>> =
-        Single
-            .fromCallable {
-                loadFromFile(paging = false).filterByQuery(query)
-            }
+        Single.fromCallable {
+            loadFromFile(paging = false).filterByQuery(query)
+        }
             .delay(sleepTime, TimeUnit.MILLISECONDS)
             .map {
                 simulateError()

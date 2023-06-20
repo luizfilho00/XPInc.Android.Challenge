@@ -7,6 +7,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.RecyclerView
 import br.com.xpinc.mobile.contacts.adapter.ContactsAdapter
 import br.com.xpinc.mobile.contacts.repository.ContactsRepository
+import br.com.xpinc.mobile.contacts.service.ContactsApiService
+import br.com.xpinc.mobile.contacts.service.ContactsApiServiceImpl
 
 /**
  * O desafio consiste numa listagem de contatos com uma busca por texto,
@@ -25,7 +27,7 @@ import br.com.xpinc.mobile.contacts.repository.ContactsRepository
  */
 class ContactsActivity : AppCompatActivity() {
 
-    private val service by lazy { ContactsApiServiceImpl(resources) }
+    private val service: ContactsApiService by lazy { ContactsApiServiceImpl(resources) }
     private val repository by lazy { ContactsRepository(service) }
     private val viewModel by viewModels<ContactsViewModel> { ContactsViewModelFactory(repository) }
     private val recyclerView by lazy { findViewById<RecyclerView>(R.id.recyclerView) }

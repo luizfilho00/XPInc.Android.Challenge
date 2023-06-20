@@ -1,6 +1,6 @@
 package br.com.xpinc.mobile.contacts.repository
 
-import br.com.xpinc.mobile.contacts.ContactsApiService
+import br.com.xpinc.mobile.contacts.service.ContactsApiService
 import br.com.xpinc.mobile.contacts.model.Contact
 import io.reactivex.Single
 
