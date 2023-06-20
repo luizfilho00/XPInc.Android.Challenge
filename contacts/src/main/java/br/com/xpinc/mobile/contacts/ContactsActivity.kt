@@ -11,7 +11,7 @@ import br.com.xpinc.mobile.contacts.repository.ContactsRepository
 /**
  * O desafio consiste numa listagem de contatos com uma busca por texto,
  * é esperado que a listagem e a busca sejam implementadas de maneira satisfatória em uma
- * arquitetura escalável com testes unitários e injeção de dependência com Dagger 2.
+ * arquitetura escalável com testes unitários e injeção de dependências com Dagger 2.
  * Pode-se fazer uso de RxJava, Flow, Coroutines ou qualquer outra tecnologia que você tenha familiaridade.
  *
  * Requisitos:
