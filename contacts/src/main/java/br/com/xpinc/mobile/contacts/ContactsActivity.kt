@@ -9,14 +9,19 @@ import br.com.xpinc.mobile.contacts.adapter.ContactsAdapter
 import br.com.xpinc.mobile.contacts.repository.ContactsRepository
 
 /**
+ * O desafio consiste numa listagem de contatos com uma busca por texto,
+ * é esperado que a listagem e a busca sejam implementadas de maneira satisfatória em uma
+ * arquitetura escalável com testes unitários e injeção de dependência com Dagger 2.
+ * Pode-se fazer uso de RxJava, Flow, Coroutines ou qualquer outra tecnologia que você tenha familiaridade.
+ *
  * Requisitos:
  * 1 - Exibir a lista de contatos retornada pelo repository
  * 2 - Usar uma arquitetura para a view: MVVM / MVI / MVP
  * 3 - Implementar busca de contatos durante a digitação do texto
- * 4 - Melhorias de código (arquitetura, performance, views, etc)
- * 5 - Testes
- * 6 - Usar dagger para prover as dependências
- * 7 - Paginação da lista de contatos (bônus)
+ * 4 - Testes unitários
+ * 5 - Usar dagger para prover as dependências
+ *
+ * Bônus: Paginação da lista de contatos (não é eliminatório)
  */
 class ContactsActivity : AppCompatActivity() {
 
